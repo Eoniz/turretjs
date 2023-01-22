@@ -45,6 +45,18 @@ model Log {
   client_session      ClientSession @relation(fields: [client_session_id], references: [id])
 }
 
+model Error {
+  id                  Int @id @default(autoincrement())
+  message             String
+  lineno              Int
+  colno               Int
+  filename            String
+  client_session_id   Int
+  creation_datetime   DateTime @default(now())
+
+  client_session      ClientSession @relation(fields: [client_session_id], references: [id])
+}
+
 model Client {
   id                  Int @id @default(autoincrement())
   uuid                String
@@ -76,4 +88,5 @@ model ClientSession {
 
   client              Client @relation(fields: [client_id], references: [id])
   logs                Log[]
+  errors              Error[]
 }
