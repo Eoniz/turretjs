@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id                  Int @id @default(autoincrement())
+  name                String
+  creation_datetime   DateTime @default(now())
+
+  versions            ProjectVersion[]
+}
+
+model ProjectVersion {
+  id                  Int @id @default(autoincrement())
+  name                String
+  project_id          Int
+  creation_datetime   DateTime @default(now())
+
+  project             Project @relation(fields: [project_id], references: [id])
+}
+
+model LogType {
+  id                  Int @id @default(autoincrement())
+  label               String
+
+  logs                Log[]
+}
+
+model Log {
+  id                  Int @id @default(autoincrement())
+  log                 String
+  log_type_id         Int
+  client_session_id   Int
+  creation_datetime   DateTime @default(now())
+
+  log_type            LogType @relation(fields: [log_type_id], references: [id])
+  client_session      ClientSession @relation(fields: [client_session_id], references: [id])
+}
+
+model Client {
+  id                  Int @id @default(autoincrement())
+  uuid                String
+  creation_datetime   DateTime @default(now())
+
+  client_navigator    ClientNavigator?
+  client_sessions     ClientSession[]
+}
+
+model ClientNavigator {
+  id                  Int @id @default(autoincrement())
+  app_code_name       String
+  app_name            String
+  app_version         String
+  user_agent          String
+  vendor              String
+  platform            String
+  client_id           Int @unique
+  creation_datetime   DateTime @default(now())
+
+  client              Client @relation(fields: [client_id], references: [id])
+}
+
+model ClientSession {
+  id                  Int @id @default(autoincrement())
+  uuid                String
+  creation_datetime   DateTime @default(now())
+  client_id           Int
+
+  client              Client @relation(fields: [client_id], references: [id])
+  logs                Log[]
+}
